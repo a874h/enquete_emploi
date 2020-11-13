@@ -37,7 +37,15 @@ import pandas as pd
 
 import cfg
 
-
+def dashboard():
+	"""
+	check overleaf: Meeting_13_nov:Exploiting EE 
+	check!!: file nb, people nb.
+	nb people: check unique id. present in 181,182,183,184 ??
+	nb employed
+	"""
+	pass
+	
 
 def test_get_employed_count_by_dep_from_sql():
 	"""
