@@ -43,7 +43,7 @@ import sqlite3
 import pandas as pd
 
 import cfg
-import tools
+import enquete_emploi.tools as ee_tools
 
 def count_unique_id():
     """
@@ -59,7 +59,7 @@ def test_get_employed_PCS_with_ROME():
     """
     fname_db="{}/emploi_1.db".format(cfg.ROOT_2018)
     con = sqlite3.connect(fname_db)
-    df = get_EE_with_ROME(con,filename="../jobagile/data/fap2009_pcs2003_romev3-1.xls")
+    df = get_employed_PCS_with_ROME(con,filename="../jobagile/data/fap2009_pcs2003_romev3-1.xls")
     df['ROME'].apply( lambda x:x[0] ).value_counts()
 
 def get_employed_PCS_with_ROME(con,filename,verbose=False):
@@ -71,7 +71,7 @@ def get_employed_PCS_with_ROME(con,filename,verbose=False):
     con.close()
     df_PCS= df_PCS.rename({'P':'PCS'},axis=1) 
     # load PCS2ROME
-    df_ROME_PCS = tools.get_PCS_ROME_table(filename)
+    df_ROME_PCS = ee_tools.get_PCS_ROME_table(filename)
     # join
     df_joined = join_ROME_codes(df_PCS,df_ROME_PCS)
     if verbose: 
