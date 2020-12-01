@@ -106,7 +106,16 @@ def test_get_employed_count_by_dep_from_sql():
     con.close()
     c.plot(kind='bar')
 
-def get_employed_count_by_dep_from_sql(con,verbose=False):
+def get_unenmployed_count_by_dep_from_sql(con):
+    """
+    """
+    q="""select DEP as dep, count(*) AS nb_chom from indiv WHERE ANCCHOM>0 GROUP BY DEP;"""
+    df_dep_chomage = pd.read_sql_query(q, con)
+    q="""select DEP as dep, count(*) AS nb from indiv GROUP BY DEP;"""
+    df_dep_all = pd.read_sql_query(q, con)
+    return pd.merge(df_dep_all,df_dep_chomage,how="inner",on="dep" )
+
+def get_employed_count_by_dep_from_sql(con, col_id='DEPETA',verbose=False):
 	"""
 	get the count of employed persons per departement.
 	
@@ -120,11 +129,11 @@ def get_employed_count_by_dep_from_sql(con,verbose=False):
 	indexed by departement.
 	
 	"""
-	q = """SELECT dep FROM indiv 
-			WHERE ACTEU6=1  ;"""
+	q = """SELECT {} FROM indiv 
+			WHERE ACTEU6=1  ;""".format(col_id)  # use sqlalchemy instead
 	df_dep_actif = pd.read_sql_query(q, con)
 	if verbose: print(df_dep_actif.memory_usage())
-	return df_dep_actif['DEP'].value_counts()
+	return df_dep_actif[col_id].value_counts()
 	
 	
 def get_employed_count_by_dep_from_csv(filename,colnames=['ACTEU6','DEP','DEPETA','AG', 'SEXE','CSTOTPRM',
