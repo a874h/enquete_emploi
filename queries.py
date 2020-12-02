@@ -136,6 +136,38 @@ def get_employed_count_by_dep_from_sql(con, col_id='DEPETA',verbose=False):
 	return df_dep_actif[col_id].value_counts()
 	
 	
+def get_employed_count_by_dep_pcs_from_sql(con):
+	"""
+	get the count of employed persons per departement.
+	
+	input:
+	------
+	con: sql connection
+	
+	output:
+	-------
+	pandas.core.series.Series
+	indexed by departement.
+	
+	"""
+	q = """SELECT DEPETA, P,count(*) FROM indiv 
+			WHERE ACTEU6=1 
+            GROUP BY DEPETA, P
+             ;"""
+	return pd.read_sql_query(q, con)
+	
+def get_employed_count_by_dep_pcs_with_ROME(con,filename):
+    # load PCS
+    df_PCS = get_employed_count_by_dep_pcs_from_sql(con)
+    df_PCS= df_PCS.rename({'P':'PCS'},axis=1) 
+    # load PCS2ROME
+    df_ROME_PCS = ee_tools.get_PCS_ROME_table(filename)
+    # join
+    df_joined = join_ROME_codes(df_PCS,df_ROME_PCS)   
+    return df_joined
+   
+    
+    
 def get_employed_count_by_dep_from_csv(filename,colnames=['ACTEU6','DEP','DEPETA','AG', 'SEXE','CSTOTPRM',
 												'NAFG017NPRM']):
 	"""
