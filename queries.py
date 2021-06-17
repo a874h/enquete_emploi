@@ -100,10 +100,11 @@ def get_employed_PCS_from_sql(con):
     get the PCS of employed responders
     CCONTR: Type de contrat de travail à l'entrée dans l'entreprise; 4=interim (p.35)
     P travail actuel	
+    DCHANTJ Durée en jours de la recherche d'emploi avant de trouver (p.63)
     
     EEC2018_Dictionnaire des variables_Indiv(FPR)-1.pdf
     """
-    q = """SELECT P,DEP,DEPETA,SEXE,CCONTR FROM indiv 
+    q = """SELECT P,DEP,DEPETA,SEXE,CCONTR,DCHANTJ,DCHANTM FROM indiv 
 			WHERE ACTEU6=1  ;"""
     return pd.read_sql_query(q, con)        
 
