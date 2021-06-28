@@ -24,7 +24,9 @@ communautaire (6 postes). Vide: Sans objet (ACTEU non renseigné, individus de 1
 * DIPFIN niveau codé de la plus haute formation ;
 * SPE version normalisée de la spécialité de la plus haute formation ;
 * ANCCHOMM ancienneté au chomage en mois (si au chomage) ;
-* DCHANTM durée au chomage avant de trouver l'emploi actuel ;
+* DCHANTM Durée en mois de la recherche d'emploi avant de trouver l'emploi occupé actuellement
+(pour ceux qui étaient au chômage avant d'occuper leur emploi actuel)
+* (DREMCM Durée en mois de la recherche d'un emploi elle n'est plus posée qu'aux seules personnes déclarant avoir recherché un emploi dans les 4 semaines s'achevant par la semaine de référence
 
 Refs:
     * DICTIONNAIRE DES VARIABLES DU FICHIER DE DONNÉES INDIVIDUELLES DE L’ENQUÊTE EMPLOI, 2017.
@@ -42,9 +44,39 @@ Refs:
 import sqlite3
 import pandas as pd
 
-import cfg
+import enquete_emploi.cfg as cfg
 import enquete_emploi.tools as ee_tools
 
+
+def test_compute_overlap_PCS_FAP_EE():
+    """
+
+    """
+    fname_db="{}/emploi_all.db".format(cfg.ROOT_2018)
+    con = sqlite3.connect(fname_db)
+    nb_overlap, nb_PCS_EE, nb_PCS_FAP = compute_overlap_PCS_FAP_EE(con)
+    print('loss in converting EE PCS:{}'.format(100.*(nb_PCS_EE- nb_PCS_FAP) / nb_PCS_EE))
+
+def compute_overlap_PCS_FAP_EE(con):
+    """
+    compute the overlap between PCS set in EE and PCS set in FAP file
+    
+    Output:
+    ---------
+    nb_overlap: int
+    nb of overlapping PCS codes in FAP table and EE
+
+    nb_PCS_EE:int
+    nb of  PCS codes in EE
+    
+    nb_PCS_FAP :int 
+    nb of  PCS codes in FAP
+    """
+
+    df_PCS_FAP = ee_tools.get_PCS_ROME_table()['PCS']
+    df_PCS_EE  = get_PCS_from_sql(con)['P']
+    nb_overlap = df_PCS_EE.isin(df_PCS_FAP).astype(int).sum()
+    return nb_overlap, df_PCS_EE.shape[0], df_PCS_FAP.shape[0]
 
 def count_unique_id_concat(fname_):
     """
@@ -94,6 +126,16 @@ def join_ROME_codes(df,df_ROME_PCS):
     """
     return pd.merge(df,df_ROME_PCS,how='inner')
     
+    
+
+    
+def get_PCS_from_sql(con):
+    """
+    get distinct PCS codes
+    """
+    q = """SELECT DISTINCT P FROM indiv ;"""
+    return pd.read_sql_query(q, con)      
+
 
 def get_employed_PCS_from_sql(con):
     """
